@@ -23,4 +23,28 @@
 ## ⚡ Quick Start
 
 ### 1. Clone the repository
-git clone https://github.com/dawmit/ScaleFactory_Hackathon.git
+```powershell
+```
+### 2. Set up Python virtual environment & install Flask
+Create a virtual environment, activate it in PowerShell, and install Flask:
+
+Create virtual environment:
+
+```powershell
+python -m venv .venv
+```
+
+```powershell
+.\.venv\Scripts\Activate.ps1
+```
+Activate flask:
+```powershell
+pip install Flask
+```
+
+
+
+
+
+
+
