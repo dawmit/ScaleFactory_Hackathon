@@ -1,6 +1,42 @@
 from flask import request, jsonify
 from config import app, db
 import database
+from services.smart_target_generator import generate_smart_target
+
+@app.route('/api/users/<int:user_id>/targets/generate', methods=['POST'])
+def generate_user_target(user_id):
+    data = request.json
+    skill_id = data.get('skill_id')
+    
+    # 1. Fetch user and skill
+    user = User.query.get(user_id)
+    skill = Skill.query.get(skill_id)
+    
+    if not user or not skill:
+        return jsonify({"error": "User or Skill not found"}), 404
+        
+    role = Role.query.get(user.role_id)
+    role_name = role.role_name if role else "your target role"
+
+    # 2. Generate the SMART target logic
+    generated_data = generate_smart_target(skill.skill_name, role_name)
+    
+    # 3. Save it to the database
+    new_target = SmartTarget(
+        user_id=user.id,
+        skill_id=skill.id,
+        target_text=generated_data["target_text"],
+        status="Not Started",
+        target_date=generated_data["target_date"]
+    )
+    
+    db.session.add(new_target)
+    db.session.commit()
+    
+    return jsonify({
+        "message": "SMART target generated successfully",
+        "target": new_target.to_json()
+    }), 201
 
 # ==========================================
 # 1. AUTHENTICATION / LOGIN
