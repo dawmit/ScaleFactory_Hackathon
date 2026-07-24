@@ -1,0 +1,18 @@
+# Ignore Python bytecode and cache directories
+**/__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Ignore virtual environments
+.venv/
+env/
+venv/
+
+# Ignore Flask instance files & databases
+Backend/instance/
+*.db
+*.sqlite3
+
+# Ignore environment variables
+.env
