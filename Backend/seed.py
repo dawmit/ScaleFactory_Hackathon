@@ -6,72 +6,105 @@ from database import Role, Skill, User, UserSkill, SmartTarget
 def seed_database():
     # Flask requires an application context to interact with the database
     with app.app_context():
-        # Optional: Clear existing data to avoid duplicates when running multiple times
+        # Clear existing data to avoid duplicates when running multiple times
         db.drop_all()
         
         # Create all tables based on your models
         db.create_all()
 
         print("Seeding Roles...")
-        role1 = Role(role_name="Frontend Developer")
-        role2 = Role(role_name="Backend Developer")
-        role3 = Role(role_name="Data Engineer")
+        # Defining the roles based on the consultant view requirements
+        role_java = Role(role_name="Java Developer")
+        role_tester = Role(role_name="Manual Tester")
+        role_admin = Role(role_name="Academy Lead") # Dedicated role for Admin view
         
-        db.session.add_all([role1, role2, role3])
-        db.session.commit() # Commit now so we can use their generated IDs
+        db.session.add_all([role_java, role_tester, role_admin])
+        db.session.commit()
 
         print("Seeding Skills...")
-        skill1 = Skill(skill_name="React", proficiency_level="Intermediate")
-        skill2 = Skill(skill_name="Python", proficiency_level="Advanced")
-        skill3 = Skill(skill_name="Docker", proficiency_level="Beginner")
-        skill4 = Skill(skill_name="SQL", proficiency_level="Intermediate")
+        # --- Java Developer Skills ---
+        # Categorized by level/difficulty as per "The Matrix" requirement
+        j_skill1 = Skill(skill_name="Modern Java & OOP Principles", proficiency_level="Advanced")
+        j_skill2 = Skill(skill_name="Spring Framework & Spring Boot", proficiency_level="Intermediate")
+        j_skill3 = Skill(skill_name="Relational & NoSQL Databases", proficiency_level="Intermediate")
+        j_skill4 = Skill(skill_name="Testing Frameworks (JUnit/Mockito)", proficiency_level="Beginner")
+        j_skill5 = Skill(skill_name="Build & CI/CD tools", proficiency_level="Beginner")
+
+        # --- Manual Tester Skills ---
+        t_skill1 = Skill(skill_name="Test Case Design & STLC", proficiency_level="Advanced")
+        t_skill2 = Skill(skill_name="API Testing & Verification", proficiency_level="Intermediate")
+        t_skill3 = Skill(skill_name="Defect Life Cycle & Management", proficiency_level="Advanced")
+        t_skill4 = Skill(skill_name="Exploratory & Edge-Case Testing", proficiency_level="Intermediate")
+        t_skill5 = Skill(skill_name="Database & SQL Verification", proficiency_level="Beginner")
         
-        db.session.add_all([skill1, skill2, skill3, skill4])
+        db.session.add_all([
+            j_skill1, j_skill2, j_skill3, j_skill4, j_skill5, 
+            t_skill1, t_skill2, t_skill3, t_skill4, t_skill5
+        ])
         db.session.commit()
 
-        print("Seeding Users...")
-        user1 = User(name="Alice Smith", role_id=role1.id)
-        user2 = User(name="Bob Jones", role_id=role2.id)
-        user3 = User(name="Charlie Brown", role_id=role3.id)
+        print("Seeding Users (Consultants & Admin)...")
+        # Creating an Admin (Academy Lead) and a couple of Consultants
+        admin_user = User(name="Academy Lead", role_id=role_admin.id)
+        user_java = User(name="Alice (Java Dev)", role_id=role_java.id)
+        user_tester = User(name="Bob (Manual Tester)", role_id=role_tester.id)
         
-        db.session.add_all([user1, user2, user3])
+        db.session.add_all([admin_user, user_java, user_tester])
         db.session.commit()
 
-        print("Seeding UserSkills...")
-        # Alice knows React and a bit of Docker
-        us1 = UserSkill(user_id=user1.id, skill_id=skill1.id)
-        us2 = UserSkill(user_id=user1.id, skill_id=skill3.id)
+        print("Seeding UserSkills (Matrix Progress)...")
+        # Alice (Java Dev) already has some skills mastered
+        us1 = UserSkill(user_id=user_java.id, skill_id=j_skill1.id)
+        us2 = UserSkill(user_id=user_java.id, skill_id=j_skill3.id)
         
-        # Bob knows Python and SQL
-        us3 = UserSkill(user_id=user2.id, skill_id=skill2.id)
-        us4 = UserSkill(user_id=user2.id, skill_id=skill4.id)
+        # Bob (Tester) has experience in test case design and defect life cycles
+        us3 = UserSkill(user_id=user_tester.id, skill_id=t_skill1.id)
+        us4 = UserSkill(user_id=user_tester.id, skill_id=t_skill3.id)
         
         db.session.add_all([us1, us2, us3, us4])
         db.session.commit()
 
-        print("Seeding SmartTargets...")
-        # Alice's goal is to improve her Docker skills
+        print("Seeding SMART Targets...")
+        # Linking to Timeline statuses: "Completed" (Mastered), "In Progress" (Learning), "Not Started" (Uncomplete)
+        
+        # Alice's SMART Goals
         target1 = SmartTarget(
-            user_id=user1.id,
-            skill_id=skill3.id,
-            target_text="Complete 'Docker for Beginners' course and containerize the frontend app.",
-            status="In Progress",
-            target_date="2026-10-15"
+            user_id=user_java.id,
+            skill_id=j_skill2.id,
+            target_text="Specific: Build a REST API. Measurable: Must have 4 CRUD endpoints. Achievable: Use Spring Boot starter. Relevant: Core Java Dev skill. Time-bound: End of Q2.",
+            status="In Progress", # Learning
+            target_date="2026-08-01"
         )
         
-        # Bob's goal is to learn React
         target2 = SmartTarget(
-            user_id=user2.id,
-            skill_id=skill1.id,
-            target_text="Build a simple full-stack app using React and Flask.",
-            status="Not Started",
-            target_date="2026-12-01"
+            user_id=user_java.id,
+            skill_id=j_skill4.id,
+            target_text="Write Mockito unit tests for the newly created Spring Boot API achieving 80% coverage by end of Q3.",
+            status="Not Started", # Uncomplete
+            target_date="2026-10-01"
+        )
+
+        # Bob's SMART Goals
+        target3 = SmartTarget(
+            user_id=user_tester.id,
+            skill_id=t_skill2.id,
+            target_text="Specific: Learn Postman for API Verification. Measurable: Write 10 automated test collections. Time-bound: By next sprint review.",
+            status="Completed", # Mastered
+            target_date="2026-06-15"
+        )
+
+        target4 = SmartTarget(
+            user_id=user_tester.id,
+            skill_id=t_skill5.id,
+            target_text="Complete a 4-hour advanced SQL tutorial and verify DB states for 3 staging tickets by end of month.",
+            status="In Progress", # Learning
+            target_date="2026-08-15"
         )
         
-        db.session.add_all([target1, target2])
+        db.session.add_all([target1, target2, target3, target4])
         db.session.commit()
 
-        print("Database seeded successfully!")
+        print("Database seeded successfully with targeted roles, skills, and SMART goals!")
 
 if __name__ == "__main__":
     seed_database()
