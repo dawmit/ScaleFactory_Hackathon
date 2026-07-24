@@ -2,6 +2,8 @@ from flask import request, jsonify
 from config import app, db
 from database import User, Skill, Role, SmartTarget, UserSkill
 from datetime import datetime, timedelta
+from services.smart_target_generator import generate_smart_target
+from services.External_Learning import fetch_all_learning_resources
 
 @app.route('/api/users/<int:user_id>/targets/generate', methods=['POST'])
 def generate_user_target(user_id):
