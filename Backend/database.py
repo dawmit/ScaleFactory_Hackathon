@@ -17,12 +17,14 @@ class Skill(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     skill_name = db.Column(db.String(80), nullable=False)
     proficiency_level = db.Column(db.String(50), nullable=False)
+    is_admin = db.Column(db.Boolean, default=False, nullable=False)
 
     def to_json(self):
         return {
             "id": self.id,
             "skillName": self.skill_name,
-            "proficiencyLevel": self.proficiency_level
+            "proficiencyLevel": self.proficiency_level,
+            "isAdmin": self.is_admin
         }
 
 class User(db.Model):
