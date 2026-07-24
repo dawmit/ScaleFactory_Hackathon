@@ -1,2 +1,26 @@
-# ScaleFactory_Hackathon
-Our mission is to build a skills matrix. We want to create a platform where a user can select a professional tech role and see the required skills, track  their progress and receive SMART targets to help them level up.
+# 🚀 [Super Markup Bros]
+
+> **Scale Factory Academy Hackathon MVP**  
+> A skills matrix platform that helps tech professionals identify skill gaps, track career progress, and receive actionable SMART targets.
+
+---
+
+## 💡 Key Features
+* **Role Selection:** Select target tech roles (DevOps Engineer, Java Developer, Manual Tester).
+* **Skill Gap Analysis:** Interactively rate skills (1–5 scale) to view real-time role readiness.
+* **SMART Targets:** Automatically generate structured goals to bridge identified gaps.
+* **Resource Matching:** Integrated YouTube API tutorials for focused learning.
+
+---
+
+## 🛠️ Tech Stack
+* **Frontend:** React, Tailwind CSS
+* **Backend:** Node.js, Express
+* **APIs:** StackExchange API, YouTube Data API
+
+---
+
+## ⚡ Quick Start
+
+### 1. Clone the repository
+git clone https://github.com/dawmit/ScaleFactory_Hackathon.git
