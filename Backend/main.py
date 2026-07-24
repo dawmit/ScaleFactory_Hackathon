@@ -1,7 +1,7 @@
 from flask import request, jsonify
 from config import app, db
-import database
-from services.smart_target_generator import generate_smart_target
+from database import User, Skill, Role, SmartTarget, UserSkill
+from datetime import datetime, timedelta
 
 @app.route('/api/users/<int:user_id>/targets/generate', methods=['POST'])
 def generate_user_target(user_id):
@@ -192,8 +192,9 @@ def get_skill_resources(skill_id):
         "skillName": skill.skill_name,
         "resources": resources
     }), 200
+
 if __name__ == "__main__":
     with app.app_context():
         db.create_all()
 
-    app.run(debug=True)
+    app.run(host="0.0.0.0", port="5000", debug=True)
