@@ -117,7 +117,7 @@ def get_user_targets(user_id):
     return jsonify([target.to_json() for target in targets]), 200
 
 @app.route('/api/targets/<int:target_id>/status', methods=['PUT'])
-def update_target_status():
+def update_target_status(target_id):    # <--- Add target_id here!
     data = request.json
     new_status = data.get('status')
     
