@@ -1,105 +1,6 @@
 import { useState, useEffect } from 'react'
 
 function App() {
-  const [stats, setStats] = useState(null)
-  const [users, setUsers] = useState([])
-  const [error, setError] = useState(null)
-
-  useEffect(() => {
-    // 1. Fetch admin dashboard stats
-    fetch('http://127.0.0.1:5000/api/admin/stats')
-      .then(res => {
-        if (!res.ok) throw new Error("Failed to fetch stats")
-        return res.json()
-      })
-      .then(data => setStats(data))
-      .catch(err => setError(err.message))
-
-    // 2. Fetch all users and filter out admins
-    fetch('http://127.0.0.1:5000/api/admin/users')
-      .then(res => {
-        if (!res.ok) throw new Error("Failed to fetch users")
-        return res.json()
-      })
-      .then(data => {
-        // Filter to keep only non-admin users
-        const nonAdminUsers = data.filter(user => !user.isAdmin)
-        setUsers(nonAdminUsers)
-      })
-      .catch(err => setError(err.message))
-  }, [])
-
-  return (
-    <div className="min-h-screen bg-gray-100 p-8">
-      <header className="max-w-4xl mx-auto mb-8 border-b pb-4">
-        <h1 className="text-3xl font-bold text-gray-800">
-          🚀 Super Markup Bros
-        </h1>
-      </header>
-
-      {error && (
-        <div className="max-w-4xl mx-auto bg-red-100 text-red-700 p-4 rounded-lg mb-6">
-          Error: {error}
-        </div>
-      )}
-
-      {/* Main Two-Column Layout */}
-      <div className="max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-6">
-        
-        {/* LEFT COLUMN: Non-Admin Users */}
-        <div className="bg-white p-6 rounded-xl shadow-lg">
-          <h2 className="text-xl font-bold text-gray-800 mb-4 border-b pb-2">
-            Users
-          </h2>
-
-          {users.length === 0 && !error ? (
-            <p className="text-gray-500 animate-pulse">Loading users...</p>
-          ) : (
-            <ul className="space-y-3">
-              {users.map(user => (
-                <li 
-                  key={user.id} 
-                  className="flex justify-between items-center bg-gray-50 p-3 rounded-lg border border-gray-200"
-                >
-                  <span className="font-medium text-gray-700">{user.name}</span>
-                  <span className="text-xs text-gray-500 bg-gray-200 px-2 py-1 rounded">
-                    Role ID: {user.roleId}
-                  </span>
-                </li>
-              ))}
-            </ul>
-          )}
-        </div>
-
-        {/* RIGHT COLUMN: Dashboard Stats */}
-        <div className="bg-white p-6 rounded-xl shadow-lg">
-          <h2 className="text-xl font-bold text-gray-800 mb-4 border-b pb-2">
-            Platform Stats
-          </h2>
-
-          {!stats && !error ? (
-            <p className="text-gray-500 animate-pulse">Loading stats...</p>
-          ) : (
-            stats && (
-              <div className="space-y-4">
-                <div className="bg-blue-50 p-4 rounded-lg">
-                  <p className="text-sm text-blue-600 font-semibold uppercase">Total Users</p>
-                  <p className="text-3xl font-bold text-blue-900">{stats.totalUsers}</p>
-                </div>
-                <div className="bg-green-50 p-4 rounded-lg">
-                  <p className="text-sm text-green-600 font-semibold uppercase">Total Skills</p>
-                  <p className="text-3xl font-bold text-green-900">{stats.totalSkills}</p>
-                </div>
-                <div className="bg-purple-50 p-4 rounded-lg">
-                  <p className="text-sm text-purple-600 font-semibold uppercase">Completed Targets</p>
-                  <p className="text-3xl font-bold text-purple-900">{stats.completedTargets}</p>
-                </div>
-              </div>
-            )
-          )}
-        </div>
-
-  // State to hold the logged-in user. Null means show the login screen.
   const [currentUser, setCurrentUser] = useState(null);
 
   // --- LOGIN COMPONENT ---
@@ -126,7 +27,6 @@ function App() {
           throw new Error(data.error || 'Login failed');
         }
 
-        // Save the user data to state to switch views
         setCurrentUser({
           id: data.userId,
           name: name,
@@ -179,7 +79,6 @@ function App() {
             </button>
           </form>
 
-          {/* Hackathon Helper Note */}
           <div className="mt-8 pt-6 border-t border-gray-100 text-sm text-gray-500">
             <p className="font-semibold mb-2">Seeded test users (Case-sensitive):</p>
             <ul className="space-y-1 list-disc list-inside">
@@ -201,7 +100,6 @@ function App() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
-    // Resources Modal State
     const [isResourceModalOpen, setIsResourceModalOpen] = useState(false);
     const [activeResources, setActiveResources] = useState({ skillName: '', items: [] });
     const [loadingResources, setLoadingResources] = useState(false);
@@ -221,7 +119,6 @@ function App() {
           const targetsData = await targetsRes.json();
           const timelineData = await timelineRes.json();
 
-          // Map the skillName from the timeline endpoint back into the targets for display
           const enrichedTargets = targetsData.map(target => {
             const tlMatch = timelineData.find(t => t.targetId === target.id);
             return { ...target, skillName: tlMatch ? tlMatch.skillName : "Target Skill" };
@@ -239,7 +136,6 @@ function App() {
       fetchUserData();
     }, [userId]);
 
-    // Helper to figure out the next status for the icon click
     const getNextStatus = (currentStatus) => {
       const statusFlow = {
         'Not Started': 'In Progress',
@@ -249,7 +145,6 @@ function App() {
       return statusFlow[currentStatus] || 'In Progress';
     };
 
-    // Handle explicitly updating the status 
     const handleUpdateStatus = async (targetId, newStatus) => {
       try {
         const res = await fetch(`http://127.0.0.1:5000/api/targets/${targetId}/status`, {
@@ -259,7 +154,6 @@ function App() {
         });
         
         if (res.ok) {
-          // Update both local states to trigger immediate UI re-render
           setTargets(prev => prev.map(t => t.id === targetId ? { ...t, status: newStatus } : t));
           setTimeline(prev => prev.map(t => t.targetId === targetId ? { ...t, status: newStatus } : t));
         }
@@ -268,7 +162,6 @@ function App() {
       }
     };
 
-    // Fetch resources dynamically from our Python backend 
     const handleViewResources = async (skillId, skillName) => {
       setLoadingResources(true);
       setIsResourceModalOpen(true);
@@ -295,7 +188,6 @@ function App() {
       }
     };
 
-    // A helper to format SMART blocks cleanly
     const formatSmartText = (text) => {
       return text.replace(/(Specific:|Measurable:|Achievable:|Relevant:|Time-bound:)/g, '\n**$1**').trim();
     };
@@ -325,7 +217,6 @@ function App() {
           </header>
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            {/* Left Column: Interactive Skills & Targets */}
             <section className="lg:col-span-2 space-y-6">
               <div className="flex justify-between items-center">
                 <h2 className="text-2xl font-bold text-gray-800">Your SMART Targets</h2>
@@ -340,7 +231,6 @@ function App() {
                     <div key={target.id} className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 flex flex-col hover:shadow-md transition-all">
                       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 gap-3">
                         <h3 className="text-lg font-bold text-gray-900 flex items-center gap-3">
-                          {/* Interactive status checkbox/tick */}
                           <button 
                             onClick={() => handleUpdateStatus(target.id, getNextStatus(target.status))}
                             title="Click to cycle status"
@@ -383,7 +273,6 @@ function App() {
                       </div>
                       
                       <div className="flex flex-col sm:flex-row gap-3 mt-auto">
-                        {/* Status Dropdown */}
                         <div className="flex-1 relative">
                           <select 
                             value={target.status}
@@ -394,13 +283,11 @@ function App() {
                             <option value="In Progress">In Progress</option>
                             <option value="Completed">Completed</option>
                           </select>
-                          {/* Custom Dropdown Arrow */}
                           <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-gray-500">
                             <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path></svg>
                           </div>
                         </div>
 
-                        {/* Resources Button */}
                         <button 
                           onClick={() => handleViewResources(target.skillId, target.skillName)}
                           className="flex-1 bg-blue-50 text-blue-700 border border-blue-100 py-2.5 rounded-lg font-medium hover:bg-blue-100 hover:text-blue-800 transition-colors shadow-sm flex items-center justify-center gap-2"
@@ -415,7 +302,6 @@ function App() {
               </div>
             </section>
 
-            {/* Right Column: Dynamic Timeline */}
             <section className="lg:col-span-1 space-y-6">
               <h2 className="text-2xl font-bold text-gray-800">Progress Timeline</h2>
               
@@ -426,7 +312,6 @@ function App() {
                   <div className="space-y-6 border-l-2 border-gray-100 ml-3 pl-5 relative">
                     {timeline.map((event, index) => (
                       <div key={index} className="relative">
-                        {/* Timeline Node */}
                         <div className={`absolute -left-[30px] top-1.5 w-4 h-4 rounded-full border-4 border-white shadow-sm transition-colors ${
                           event.status === 'Completed' ? 'bg-green-500' : 
                           event.status === 'In Progress' ? 'bg-blue-500' : 'bg-gray-300'
@@ -453,7 +338,6 @@ function App() {
           </div>
         </div>
 
-        {/* Floating External Resources Modal */}
         {isResourceModalOpen && (
           <div className="fixed inset-0 bg-black/60 flex items-center justify-center p-4 z-50 backdrop-blur-sm transition-opacity">
             <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[85vh] flex flex-col overflow-hidden">
@@ -514,19 +398,109 @@ function App() {
     );
   };
 
-  // --- ADMIN DASHBOARD PLACEHOLDER ---
-  const AdminDashboard = () => (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50">
-      <h1 className="text-3xl font-bold text-gray-900 mb-4">Admin Dashboard</h1>
-      <p className="text-gray-500 mb-8">Welcome, Academy Lead. The admin view goes here.</p>
-      <button 
-        onClick={() => setCurrentUser(null)}
-        className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-      >
-        Sign Out
-      </button>
-    </div>
-  );
+  // --- ADMIN DASHBOARD COMPONENT ---
+  const AdminDashboard = () => {
+    const [users, setUsers] = useState([]);
+    const [heatmap, setHeatmap] = useState([]);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+      const fetchAdminData = async () => {
+        try {
+          const [usersRes, heatmapRes] = await Promise.all([
+            fetch('http://127.0.0.1:5000/api/admin/users'),
+            fetch('http://127.0.0.1:5000/api/admin/heatmap')
+          ]);
+          setUsers(await usersRes.json());
+          setHeatmap(await heatmapRes.json());
+        } catch(err) {
+          console.error(err);
+        } finally {
+          setLoading(false);
+        }
+      };
+      fetchAdminData();
+    }, []);
+
+    const getHeatmapColor = (status) => {
+      switch(status) {
+        case 'Missing': return 'bg-red-50 border-red-200 text-red-800';
+        case 'Optimal': return 'bg-green-50 border-green-200 text-green-800';
+        case 'Surplus': return 'bg-indigo-50 border-indigo-200 text-indigo-800';
+        default: return 'bg-gray-50 border-gray-200 text-gray-800';
+      }
+    };
+
+    if (loading) return <div className="min-h-screen flex items-center justify-center bg-gray-50"><p className="text-xl text-gray-500 animate-pulse">Loading Admin Data...</p></div>;
+
+    // Filter out the admin user from the consultant list for clarity
+    const consultants = users.filter(u => u.name !== 'Academy Lead');
+
+    return (
+      <div className="min-h-screen bg-gray-50 p-4 md:p-8 relative">
+        <div className="max-w-7xl mx-auto space-y-8">
+          <header className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+            <div>
+              <h1 className="text-3xl font-bold text-gray-900">Admin Dashboard</h1>
+              <p className="text-gray-500 mt-1 text-lg">Academy Overview</p>
+            </div>
+            <button 
+              onClick={() => setCurrentUser(null)}
+              className="text-sm font-medium text-gray-500 hover:text-gray-800 border border-gray-200 px-4 py-2 rounded-lg"
+            >
+              Sign Out
+            </button>
+          </header>
+
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            {/* Left Column: Users List */}
+            <section className="lg:col-span-1 space-y-6">
+              <h2 className="text-2xl font-bold text-gray-800">Consultants ({consultants.length})</h2>
+              <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden divide-y divide-gray-100">
+                {consultants.map(user => (
+                  <div key={user.id} className="p-4 flex items-center gap-4 hover:bg-gray-50 transition-colors cursor-pointer">
+                    <div className="h-10 w-10 bg-indigo-100 text-indigo-700 rounded-full flex items-center justify-center font-bold">
+                      {user.name.charAt(0)}
+                    </div>
+                    <div>
+                      <p className="font-semibold text-gray-900">{user.name}</p>
+                      <p className="text-xs text-gray-500 uppercase tracking-wide">ID: {user.id}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </section>
+
+            {/* Right Column: Skills Heatmap */}
+            <section className="lg:col-span-2 space-y-6">
+              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                <h2 className="text-2xl font-bold text-gray-800">Organization Skill Heatmap</h2>
+                
+                {/* Heatmap Legend */}
+                <div className="flex gap-3 text-xs font-semibold bg-white px-3 py-2 rounded-lg border border-gray-100 shadow-sm">
+                  <div className="flex items-center gap-1.5"><span className="w-3 h-3 rounded-full bg-red-400"></span> Missing</div>
+                  <div className="flex items-center gap-1.5"><span className="w-3 h-3 rounded-full bg-green-400"></span> Optimal (1)</div>
+                  <div className="flex items-center gap-1.5"><span className="w-3 h-3 rounded-full bg-indigo-400"></span> Surplus (2+)</div>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {heatmap.map(skill => (
+                  <div key={skill.id} className={`p-5 rounded-xl border ${getHeatmapColor(skill.status)} shadow-sm flex flex-col justify-between h-32 transition-all hover:scale-[1.02]`}>
+                    <div className="flex justify-between items-start mb-2">
+                      <span className="text-xs font-bold uppercase tracking-wider opacity-80">{skill.proficiency}</span>
+                      <span className="text-2xl font-black opacity-90">{skill.count}</span>
+                    </div>
+                    <h3 className="font-bold text-lg leading-tight line-clamp-2">{skill.skillName}</h3>
+                  </div>
+                ))}
+              </div>
+            </section>
+          </div>
+        </div>
+      </div>
+    );
+  };
 
   // --- MAIN APP ROUTING ---
   if (!currentUser) return <LoginScreen />;

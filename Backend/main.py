@@ -41,7 +41,7 @@ def generate_user_target(user_id):
     }), 201
 
 # ==========================================
-# 1. AUTHENTICATION / LOGIN
+# 1.  LOGIN
 # ==========================================
 
 @app.route('/api/login', methods=['POST'])
@@ -53,11 +53,15 @@ def login():
     if not user:
         return jsonify({"error": "User not found"}), 404
         
+    # FETCH THE ROLE TO CHECK IF THIS USER IS AN ADMIN
+    role = Role.query.get(user.role_id)
+    is_admin = True if (role and role.role_name == "Academy Lead") else False
+        
     return jsonify({
         "message": "Login successful",
         "userId": user.id,
-        "isAdmin": getattr(user, 'is_admin', False), # Defaults to False if column missing
-        "redirectTarget": "/admin-dashboard" if getattr(user, 'is_admin', False) else "/user-dashboard"
+        "isAdmin": is_admin,
+        "redirectTarget": "/admin-dashboard" if is_admin else "/user-dashboard"
     }), 200
 
 
@@ -81,6 +85,37 @@ def get_admin_stats():
         "totalSkills": total_skills,
         "completedTargets": completed_targets
     }), 200
+
+@app.route('/api/admin/heatmap', methods=['GET'])
+def get_admin_heatmap():
+    skills = Skill.query.all()
+    data = []
+    
+    for skill in skills:
+        # Count how many users already have this skill
+        base_count = UserSkill.query.filter_by(skill_id=skill.id).count()
+        # Count how many have learned it via SMART targets
+        completed_count = SmartTarget.query.filter_by(skill_id=skill.id, status="Completed").count()
+        
+        total = base_count + completed_count
+        
+        # Categorize the skill for the heatmap
+        if total == 0:
+            status = "Missing"
+        elif total == 1:
+            status = "Optimal"
+        else:
+            status = "Surplus"
+            
+        data.append({
+            "id": skill.id,
+            "skillName": skill.skill_name,
+            "proficiency": skill.proficiency_level,
+            "count": total,
+            "status": status
+        })
+        
+    return jsonify(data), 200
 
 @app.route('/api/admin/skills', methods=['POST'])
 def create_skill():
